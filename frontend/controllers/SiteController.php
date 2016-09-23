@@ -1,8 +1,11 @@
 <?php
 namespace frontend\controllers;
 
+use EasyWeChat\Foundation\Application;
+use EasyWeChat\Payment\Order;
 use Yii;
 use yii\base\InvalidParamException;
+use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -72,7 +75,36 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $options = Yii::$app->params['wechat'];
+        $wechatApp = new Application($options);
+        $js = $wechatApp->js;
+        $apiList = [
+            'checkJsApi',
+            'onMenuShareTimeline',
+            'onMenuShareAppMessage',
+            'onMenuShareQQ',
+            'onMenuShareWeibo',
+            'onMenuShareQZone',
+            'chooseWXPay'
+        ];
+        $config = $js->config($apiList, true, false, true);
+        $attributes = [
+            'trade_type'       => 'JSAPI',
+            'body'             => 'iPad mini 16G 白色',
+            'detail'           => 'iPad mini 16G 白色',
+            'out_trade_no'     => '1217752501201407033233368018',
+            'total_fee'        => 15.6,
+            'notify_url'       => Yii::$app->request->hostInfo.'/order-notify'
+        ];
+        $order = new Order($attributes);
+        $payment = $wechatApp->payment;
+        $result = $payment->prepare($order);
+        $payConfig = [];
+        if ($result->return_code == 'SUCCESS' && $result->result_code == 'SUCCESS'){
+            $prepayId = $result->prepay_id;
+            $payConfig = $payment->configForJSSDKPayment($prepayId);
+        }
+        return $this->render('index', ['jsConfig' => $config, 'payConfig' => \GuzzleHttp\json_encode($payConfig)]);
     }
 
     /**
