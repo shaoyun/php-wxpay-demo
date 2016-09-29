@@ -87,7 +87,7 @@ class SiteController extends Controller
             'onMenuShareQZone',
             'chooseWXPay'
         ];
-        $config = $js->config($apiList, true, false, true);
+        $config = $js->config($apiList, $options['debug'], false, true);
         $attributes = [
             'trade_type'       => 'JSAPI',
             'body'             => 'iPad mini 16G 白色',
