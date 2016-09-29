@@ -34,6 +34,17 @@ wx.ready(function () {
     //分享到腾讯微博
     wx.onMenuShareWeibo(shareDataWithDesc);
 });
+wx.chooseWXPay({
+     timestamp:  payConfig['timestamp'],
+     nonceStr:   payConfig['nonceStr'],
+     package:    payConfig['package'],
+     signType:   payConfig['signType'],
+     paySign:    payConfig['paySign'],
+     success: function (res) {
+         // 支付成功后的回调函数
+         console.log(res);
+     }
+});
 EOF;
 $this->registerJsFile("http://res.wx.qq.com/open/js/jweixin-1.0.0.js", $insert_options);
 $this->registerJs($jsContent, $this::POS_END);
